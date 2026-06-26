@@ -15,7 +15,6 @@ library(dplyr)
 library(tidyr)
 source("./data/processing/utils.R")
 
-RELEVANT_YEARS <- 2021:2022 # pre- and post-years
 OUTPUT_FILE = "./data/clean/wa_migration_breakdown.csv"
 
 wa_migration_breakdown <- create_irs_dataset(function (path, year_code, year) {
@@ -29,8 +28,8 @@ wa_migration_breakdown <- create_irs_dataset(function (path, year_code, year) {
       mutate(year = year, direction = direction, .after = "state")
   }))
 }) |>
-  filter(year %in% RELEVANT_YEARS) |>
-  group_by(state, year, direction) |>
+  filter(year == 2021) |>
+  group_by(state, direction) |>
   summarise(n1 = sum(n1), .groups = "drop") |>
   pivot_wider(names_from = direction, values_from = n1,
               names_glue = "{ifelse(direction == 'in', 'to_WA_n1', 'from_WA_n1')}") |>

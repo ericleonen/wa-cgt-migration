@@ -48,6 +48,8 @@ outlier_states <- wa_migration_breakdown |>
   unique()
 
 # plot: distributions of total migration in 2021 and 2022
+unit_labels <- c("AGI" = "AGI (Thousands of USD)", "N1" = "N1 (Households)", "N2" = "N2 (Individuals)")
+
 wa_migration_breakdown |>
   pivot_longer(cols = c(n1, n2, agi), names_to = "var") |>
   mutate(var = toupper(var),
@@ -57,8 +59,9 @@ wa_migration_breakdown |>
   geom_histogram(bins = 15, color = "white") +
   geom_vline(aes(xintercept = upper),
              linetype = "dashed", color = "red", linewidth = 0.5) +
-  facet_grid(year ~ var, scales = "free") +
-  labs(title = "WA Total (Inflow + Outflow) Migration, 2021-2022") +
+  facet_grid(year ~ var, scales = "free",
+             labeller = labeller(var = unit_labels)) +
+  labs(title = "WA Total Bilateral (Inflow + Outflow) Migration, 2021-2022") +
   theme_minimal() +
   theme(strip.text = element_text(face = "bold"),
         axis.title = element_blank(),
@@ -116,11 +119,48 @@ panel_migration_total <- bind_rows(
                 outflow_rate = mean(outflow_rate),
                 net_y2_agi = mean(net_y2_agi),
                 .groups = "drop") |>
-      mutate(state = paste0("CONTROL_", group))
+      mutate(state = paste("Pool", group))
   }, min_sims, seq_along(min_sims))
 )
 
-panel_migration_total |> filter(agi_group == 0, age_group == 0)
+panel_migration_total |>
+  filter(age_group == 0, agi_group %in% LOW_AGI_GROUPS) |>
+  group_by(state, year) |>
+  summarise(outflow_rate = mean(outflow_rate, na.rm = TRUE),
+            net_n1       = mean(net_n1,       na.rm = TRUE),
+            net_y2_agi   = mean(net_y2_agi,   na.rm = TRUE),
+            .groups = "drop") |>
+  filter(year < 2021) |>
+  pivot_longer(cols = c(outflow_rate, net_n1, net_y2_agi),
+               names_to = "var", values_to = "value") |>
+  mutate(
+    var = factor(var,
+                 levels = c("outflow_rate", "net_n1", "net_y2_agi"),
+                 labels = c("Outflow Rate", "Net N1", "Net AGI")),
+    is_wa = state == "WA",
+    state = factor(state, levels = c("WA", paste("Pool", 1:5)))
+  ) |>
+  ggplot(aes(x = year, y = value,
+             color = is_wa, linetype = state, linewidth = is_wa)) +
+  geom_line() +
+  facet_wrap(~ var, scales = "free_y", ncol = 1) +
+  scale_linewidth_manual(values = c("TRUE" = 1.5, "FALSE" = 0.8), guide = "none") +
+  scale_color_manual(values = c("TRUE" = "steelblue", "FALSE" = "gray40"), guide = "none") +
+  scale_linetype_manual(values = c("WA" = "solid",
+                                   "Pool 1" = "dashed",
+                                   "Pool 2" = "dotted",
+                                   "Pool 3" = "dotdash",
+                                   "Pool 4" = "longdash",
+                                   "Pool 5" = "twodash")) +
+  labs(title = "Low-Income Pre-Treatment Migration Trends: WA vs Control Groups",
+       subtitle = "Age group: All | AGI groups: 1-3 | Years: pre-2021",
+       x = NULL, y = NULL, linetype = "State") +
+  guides(linetype = guide_legend(override.aes = list(color = "black", linewidth = 0.8),
+                                 keywidth = unit(2.5, "cm"))) +
+  theme_minimal() +
+  theme(strip.text = element_text(face = "bold"),
+        legend.position = "top",
+        legend.text = element_text(size = 10))
 
 print(paste("Successfully wrote to", 
             DONORS_FILE, 

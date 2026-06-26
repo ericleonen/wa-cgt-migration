@@ -29,6 +29,7 @@ state_migration_total <- create_irs_dataset(function (path, year_code, year) {
     pivot_longer(cols = matches(COL_PATTERN),
                  names_to = c(".value", "age_group"),
                  names_pattern = "^(.+)_([0-6])") |>
+    select(-nonmig_y1_agi, -samest_y1_agi) |>
     mutate(outflow_n1 = outflow_n1,
            net_outflow_n1 = outflow_n1 - inflow_n1,
            total_n1 = nonmig_n1 + samest_n1 + outflow_n1, # data gives y2 total
