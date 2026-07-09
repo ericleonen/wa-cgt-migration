@@ -1,3 +1,16 @@
+# ==============================================================================
+# Script: breakdown_demographics.R
+# Purpose: Describe the distributions of age and wealth of taxpayers in our
+#          date in 2021 and 2022
+#
+# Inputs:
+# - data/clean/state_migration_total.csv
+#
+# Outputs:
+# - ./artifacts/age_breakdown.csv: df of age distributions (counts and %'s)
+# - ./artifacts/agi_breakdown.csv: df of AGI distributions (counts and %'s)
+# ==============================================================================
+
 library(tidyr)
 library(dplyr)
 
@@ -11,7 +24,7 @@ age_breakdown <- wa_migration_total |>
 age_breakdown$`2021 (%)` <- age_breakdown$`2021` / sum(age_breakdown$`2021`)
 age_breakdown$`2022 (%)` <- age_breakdown$`2022` / sum(age_breakdown$`2022`)
 
-age_breakdown
+write.csv(age_breakdown, "./artifacts/age_breakdown.csv", row.names = FALSE)
 
 agi_breakdown <- wa_migration_total |>
   group_by(agi_class, year) |>
@@ -20,4 +33,4 @@ agi_breakdown <- wa_migration_total |>
 agi_breakdown$`2021 (%)` <- agi_breakdown$`2021` / sum(agi_breakdown$`2021`)
 agi_breakdown$`2022 (%)` <- agi_breakdown$`2022` / sum(agi_breakdown$`2022`)
 
-agi_breakdown
+write.csv(agi_breakdown, "./artifacts/agi_breakdown.csv", row.names = FALSE)
