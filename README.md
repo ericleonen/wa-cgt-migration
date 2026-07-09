@@ -8,8 +8,6 @@ On May 4, 2021, Washington State Governor Jay Inslee signed Senate Bill 5096 int
 
 On May 4, 2021, Washington State established a 7% capital gains tax on gains in excess of $250,000. In this paper, we estimate the causal effect of this policy on the out-migration of high-income taxpayers from Washington. We employ a differences-in-differences design comparing Washington to a synthetic control state, matched on pre-treatment migration trends among low-income taxpayers. We estimate that the capital gains tax caused 0.9% more high-income taxpayers from Washington to leave in 2021, a net loss of over 1,000 high-income households and $1.37 million in adjusted gross income, and confirm the significance of this estimate with a permutation placebo test.
 
-## Parallel Trends
-
 ![Parallel trends between Washington and the synthetic control unit](figures/parallel-trends.png)
 
 ## Repository Structure
